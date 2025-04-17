@@ -46,10 +46,10 @@ const getPreProcessor =
     const isInDiffFileList = diffFileList.includes(filename);
     const isInUntrackedFileList = untrackedFileList.includes(filename);
     const shouldBeProcessed =
-      process.env.VSCODE_CLI !== undefined ||
-      isInDiffFileList ||
-      isInUntrackedFileList;
-
+      process.env.VSCODE_PID !== undefined ||
+      diffFileList.includes(filename) ||
+      untrackedFileList.includes(filename);
+    
     log(
       isInDiffFileList
         ? "Found changes in"
@@ -91,16 +91,16 @@ const getUnstagedChangesError = (filename: string): [Linter.LintMessage] => {
   return [fatalError];
 };
 
-const getPostProcessor = (staged = false) => {
-  log(
-    "Creating post-processor for",
-    staged ? "staged files only" : "changed files"
-  );
-
-  return (
+const getPostProcessor =
+  (staged: boolean) =>
+  (
     messages: Linter.LintMessage[][],
     filename: string
   ): Linter.LintMessage[] => {
+    log(
+      "Creating post-processor for",
+      staged ? "staged files only" : "changed files"
+    );
     log("Processing messages for", filename);
     if (messages.length === 0) {
       log("Skipping file because it has no messages");
